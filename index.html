@@ -28,16 +28,16 @@
     function($routeProvider) {
       $routeProvider.
         when('/', {
-          templateUrl: 'templates/_app.html',
+          templateUrl: 'assets/templates/_app.html',
           controller: 'appController'
         }).
         when('/item/:local_link', {
-          templateUrl: 'templates/_photo_detail.html',
+          templateUrl: 'assets/templates/_photo_detail.html',
           controller: 'detailsController'
         }).
         otherwise({
           redirectTo:'/', 
-          templateUrl: 'templates/_app.html',
+          templateUrl: 'assets/templates/_app.html',
           controller: 'appController'
         });
   }]);
@@ -123,7 +123,7 @@
     return {
       restrict: 'E',
       replace: true,  
-      templateUrl: 'templates/_photo.html', 
+      templateUrl: 'assets/templates/_photo.html', 
     };
   }
 
