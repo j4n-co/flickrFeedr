@@ -14,6 +14,8 @@
   <script src="http://cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.16/angular-sanitize.js"></script>
   <script src="http://cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.16/angular-animate.js"></script>
   <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+  <!-- because GH-pages http://www.verdantrefuge.com/writing/2013/angularjs-changing-app-path-base-element/ -->
+  <base href="/flickrFeedr/" />
 </head>
 
 <body ng-app="app" ng-controller="appController">
@@ -24,21 +26,18 @@
 
   app.config(['$routeProvider',
     function($routeProvider) {
-      var site_prefix = ""
-      if (window.location.host.match(/github/).length > 0 ){
-        var site_prefix = '/flickrFeedr';
-      }
+
       $routeProvider.
-        when(site_prefix + '/', {
+        when('/', {
           templateUrl: 'partials/_app.html',
           controller: 'appController'
         }).
-        when(site_prefix + '/item/:local_link', {
+        when('/item/:local_link', {
           templateUrl: 'partials/_photo_detail.html',
           controller: 'detailsController'
         }).
         otherwise({
-          redirectTo: site_prefix + '/'
+          redirectTo: '/'
         });
   }]);
 
