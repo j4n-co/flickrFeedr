@@ -14,7 +14,6 @@
   <script src="http://cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.16/angular-sanitize.js"></script>
   <script src="http://cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.16/angular-animate.js"></script>
   <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-
 </head>
 
 <body ng-app="app" ng-controller="appController">
@@ -25,19 +24,24 @@
 
   app.config(['$routeProvider',
     function($routeProvider) {
+      var site_prefix = ""
+      if (window.location.host.match(/github/).length > 0 ){
+        var site_prefix = '/flickrFeedr';
+      }
       $routeProvider.
-        when('/', {
+        when(site_prefix + '/', {
           templateUrl: 'partials/_app.html',
           controller: 'appController'
         }).
-        when('/item/:local_link', {
+        when(site_prefix + '/item/:local_link', {
           templateUrl: 'partials/_photo_detail.html',
           controller: 'detailsController'
         }).
         otherwise({
-          redirectTo: '/'
+          redirectTo: site_prefix + '/'
         });
   }]);
+
 
   var PhotosFactory = function($resource){
     return $resource('http://api.flickr.com/services/feeds/photos_public.gne', 
