@@ -28,16 +28,16 @@
     function($routeProvider) {
       $routeProvider.
         when('/', {
-          templateUrl: '/partials/_app.html',
+          templateUrl: 'partials/_app.html',
           controller: 'appController'
         }).
         when('/item/:local_link', {
-          templateUrl: '/partials/_photo_detail.html',
+          templateUrl: 'partials/_photo_detail.html',
           controller: 'detailsController'
         }).
         otherwise({
           redirectTo:'/', 
-          templateUrl: '/partials/_app.html',
+          templateUrl: 'partials/_app.html',
           controller: 'appController'
         });
   }]);
