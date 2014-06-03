@@ -1,0 +1,33 @@
+<div class="feedItems">
+
+<div class="feedItem feedItem-detail">
+  <a href="{{photo.link}}" class="feedItem-title" truncate>
+    {{photo.title}}
+  </a>
+  <a class="feedItem-back-button" href="#/">back</a>
+
+  <div class="feedItem-meta">
+    <a href="{{photo.author_link}}">{{photo.author_name}}</a> | 
+    
+    <time class="feedItem-date" datetime="{{photo.published}}">
+      Published: {{photo.published | ordinalDate:"d MMM yyyy 'at' H:mm" }}
+    </time>
+  </div>
+
+  <div class="feedItem-description column l-row-fixed-fluid"> 
+
+    <div class="l-col-fixed">
+      <img ng-src="{{photo.media.m}}" class="feedItem-image-large" /> 
+    </div>
+
+    <div class="l-col-fluid">
+      <p class="feedItem-description" ng-bind-html="photo.description"></p>
+      <ul class="tags">
+        <li class="tag-label">tags:</li>
+        <li class="tag" ng-repeat="tag in photo.tags" ng-click="changeTag(tag)">{{tag}}</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+</div>

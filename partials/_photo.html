@@ -1,0 +1,26 @@
+<div class="feedItem l-row-fixed-fluid">
+  <div class="l-col-fixed">
+    <a href="#item/{{photo.local_link}}" class="feedItem-image-thumbnail" style="background-image:url({{photo.media.m}});"></a>	
+  </div>
+
+  <div class="feedItem-description column l-col-fluid"> 
+    <a href="#item/{{photo.local_link}}" class="feedItem-title" truncate>
+    {{photo.title}}
+    </a>
+
+    <div class="feedItem-meta">
+      <a class="feedItem-author-link" target="_blank" href="http://www.flickr.com/people/{{photo.author_id}}">{{photo.author_name}}</a>
+
+      <time class="feedItem-date" datetime="{{photo.published}}">
+        Published: {{photo.published | ordinalDate:"d MMM yyyy 'at' H:mm" }}
+      </time>
+      <a class="feedItem-photo-link" target="_blank" href="{{photo.link}}">View on Flickr</a>
+    </div>
+
+    <ul class="hide">
+      <li ng-repeat="(key,val) in photo">
+       <strong>{{key}}:</strong> {{val}}
+     </li>
+   </ul>
+
+</div>

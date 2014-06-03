@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>CodePen - A Pen by j4n</title>
+  <link rel="stylesheet" href="assets/stylesheets/normalize.css">
+  <link rel="stylesheet" href="assets/stylesheets/style.css">
+  <script src='assets/scripts/ftellipsis.min.js'></script>
+  <script src='assets/scripts/fuse.min.js'></script>
+  <script src='http://ajax.googleapis.com/ajax/libs/angularjs/1.2.16/angular.min.js'></script>
+  <script src='http://cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.16/angular-resource.min.js'></script>
+  <script src='http://cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.16/angular-route.min.js'></script>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.16/angular-sanitize.js"></script>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.16/angular-animate.js"></script>
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
+</head>
+
+<body ng-app="app" ng-controller="appController">
+    <div ng-view></div>
+<script>
+  
+  var app = angular.module('app', ['ngResource', 'ngRoute', 'ngSanitize', 'ngAnimate']);
+
+  app.config(['$routeProvider',
+    function($routeProvider) {
+      $routeProvider.
+        when('/', {
+          templateUrl: 'partials/_app.html',
+          controller: 'appController'
+        }).
+        when('/item/:local_link', {
+          templateUrl: 'partials/_photo_detail.html',
+          controller: 'detailsController'
+        }).
+        otherwise({
+          redirectTo: '/'
+        });
+  }]);
+
+  var PhotosFactory = function($resource){
+    return $resource('http://api.flickr.com/services/feeds/photos_public.gne', 
+      {
+        format: 'json',
+        jsoncallback: 'JSON_CALLBACK',
+        params: {
+          tags: 'potato', 
+          tagmode: 'all'
+        }
+      },
+      {
+        get: {
+          isArray: true, 
+          method: 'JSONP',  
+          transformResponse: function(data){
+            angular.forEach(data.items, function(photo, index){
+              var local_link = photo.link.split('/')
+              local_link = local_link[local_link.length-2]
+              photo.local_link = local_link
+
+              photo.string_tags = photo.tags
+              photo.tags = photo.tags.split(' ')
+              var description = $(photo.description)
+              photo.author_link = description.first().find('a').get().toString()
+              photo.author_name = description.first().find('a').html()
+              //remove images from descriptions 
+              photo.description = description.last().clone()
+              photo.description.find('img').remove()
+              photo.description = photo.description[0].outerHTML
+            })
+            return data.items
+        }
+      }
+    })
+  };
+
+
+  var appController = function($scope, Photos, $location, $rootScope,  $filter){
+    
+    $scope.searchString = ""
+
+    $scope.changeTag = function(tag){
+      $scope.photos = Photos.get({tags: tag}); 
+      window.location.href= "#/";
+      $scope.filteredPhotos = $scope.photos
+    }
+    
+    if (typeof $scope.photos == 'undefined' ){
+      $scope.photos = []
+      $scope.photos = Photos.get({tags: 'potato'}); 
+      $scope.filteredPhotos = $scope.photos
+    }
+    
+    $scope.filterPhotos = function(queryString){
+      $scope.filteredPhotos =  $filter('searchFilter')($scope.photos, queryString)
+    }
+  };  
+
+  var detailsController  = function($scope, Photos, $routeParams, $location, $rootScope){
+    
+    function findPhotoByID(photos){
+      $scope.photo = $.grep(photos, function(n,i){
+        return (n.local_link == $routeParams.local_link);
+      })[0];
+    }
+    
+    if ($scope.photos.length == 0 ){
+      $scope.photos = Photos.get({tags: 'potato'}, function(photos){
+        findPhotoByID(photos)
+      }); 
+    } else {
+      findPhotoByID($scope.photos)
+    }
+  } 
+
+
+  var photoDirective = function(){
+    return {
+      restrict: 'E',
+      replace: true,  
+      templateUrl: 'partials/_photo.html', 
+    };
+  }
+
+  var truncateDirective = function(){
+    return {
+      restrict: 'A',
+      template: "<h1 class='feedItem-title'>{{photo.title}}</h1>",
+      replace: false,  
+      link: function(scope, element, attributes, controller){
+          var ellipsis = new Ellipsis(element[0]);
+          ellipsis.calc();
+          ellipsis.set();
+      }
+    }
+  }
+  
+  var searchFilter = function($filter){
+
+  }
+
+  app.factory('Photos', ['$resource', PhotosFactory]);
+  app.directive('photo', photoDirective)
+  app.directive('truncate', truncateDirective)
+
+
+//MIT License
+//https://github.com/michaelbromley/angularUtils/blob/master/src/filters/ordinalDate/ordinalDate.js
+app.filter('ordinalDate', function($filter) {
+
+        var getOrdinalSuffix = function(number) {
+            var suffixes = ["'th'", "'st'", "'nd'", "'rd'"];
+            var relevantDigits = (number < 30) ? number % 20 : number % 30;
+            return (relevantDigits <= 3) ? suffixes[relevantDigits] : suffixes[0];
+        };
+
+        var getIndecesOfDayCharacter = function(format) {
+            var dayRegex = /(?:'(?:[^']|'')*')|(?:d+)/g;
+            var matchingIndices = [];
+            var finishedLooking = false;
+
+            while(!finishedLooking) {
+                var matches = dayRegex.exec(format);
+                if (matches) {
+                    dayRegex.lastIndex = matches.index + matches[0].length;
+                    if (matches[0] === 'd') {
+                        matchingIndices.push(matches.index + 1);
+                    }
+                } else {
+                    finishedLooking = true;
+                }
+            }
+            return matchingIndices;
+        };
+
+        var insertAtIndex = function(inputString, index, stringToInsert) {
+            var partBeforeIndex = inputString.substring(0, index);
+            var partAfterIndex = inputString.substring(index, inputString.length);
+            return partBeforeIndex + stringToInsert + partAfterIndex;
+        };
+
+        return function(timestamp, format) {
+            var date = new Date(timestamp);
+            var dayOfMonth = date.getDate();
+            var suffix = getOrdinalSuffix(dayOfMonth);
+
+            var matchingIndices = getIndecesOfDayCharacter(format);
+
+            // now we to insert the suffix at the index(-ces) that we found
+            for (var i = matchingIndices.length; i > 0; i --) {
+                format = insertAtIndex(format, matchingIndices[i-1], suffix);
+            }
+            return $filter('date')(date, format);
+        };
+    });
+// END ordinalDate Filter
+
+app.filter('searchFilter', function($filter){
+    return function(input, query){
+      if (query == ''){
+        return input
+      }
+      var matcher = new Fuse(input, {keys: ['title', 'description'], threshold: 0.0} );
+      var output = matcher.search(query)
+      delete matcher
+      return output;
+    }
+});
+
+app.controller('appController',  appController);
+app.controller('detailsController', detailsController);
+
+</script>
+
+</body>
+</html>

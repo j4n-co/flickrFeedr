@@ -1,0 +1,6 @@
+<div>
+<input ng-model="searchString" class="searchbar" type="search" placeholder="looking for something?" ng-change="filterPhotos(searchString)">
+	<div class="feedItems">
+		<photo ng-repeat="photo in filteredPhotos" ng-model="photo" class="animate"></photo>
+	</div>
+</div>
